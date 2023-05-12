@@ -98,13 +98,11 @@ class BlockPrinter:
                 debug_mask = 0xff00ffff
                 debug_val  = 0xD700D6D7
             n = self.val
-            if (n & debug_mask) == debug_val:
-                tag = int((n >> 16) & 0xff)
-                return debug_tags.get(tag,
-                                      "Debug_tag(0x%x)" % int(tag))
-            else:
+            if n & debug_mask != debug_val:
                 return "I(%d)" % int(n >> 1)
 
+            tag = int((n >> 16) & 0xff)
+            return debug_tags.get(tag, "Debug_tag(0x%x)" % tag)
         # otherwise, it's a block
 
         if self.tagname == 'Double_tag':
@@ -134,7 +132,7 @@ class BlockPrinter:
             int(markbits['GARBAGE']): 'GARBAGE',
             (3 << 8): 'NOT_MARKABLE'
         }
-        return '%s(%s, %s)' % (self.tagname, s, gc[self.gc])
+        return f'{self.tagname}({s}, {gc[self.gc]})'
 
 
     def display_hint (self):
@@ -159,10 +157,6 @@ Fields()
 
 
 def value_printer(val):
-    if str(val.type) != 'value':
-        return None
-
-
-    return BlockPrinter(val)
+    return None if str(val.type) != 'value' else BlockPrinter(val)
 
 gdb.pretty_printers = [value_printer]
